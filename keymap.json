@@ -33,6 +33,10 @@
     {
       "paramName": "HID_POINTING",
       "value": "y"
+    },
+    {
+      "paramName": "EXPERIMENTAL_RGB_LAYER",
+      "value": "y"
     }
   ],
   "layout_parameters": {},
