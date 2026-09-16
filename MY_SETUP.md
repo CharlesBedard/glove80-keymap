@@ -11,10 +11,12 @@ Log in, clone it to my account, then edit.
 
 ## Custom Defined Behaviors
 
-Paste at the top of the "Custom Defined Behaviors" text box:
+As of the full redesign (see below), this is no longer hand-retyped — the
+whole layout including these defines is uploaded as one JSON file. For
+reference, the defines baked into that file:
 
 ```h
-#define OPERATING_SYSTEM 'M' // macOS
+#define OPERATING_SYSTEM 'L' // Linux (base); macOS overlay applied at runtime
 
 #define SPACE_FORGIVENESS // for lingering taps on thumb letter R in Enthium
 #define THUMB_HOLDING_TIME 200 // prefer typing over faster layer activation
@@ -23,8 +25,7 @@ Paste at the top of the "Custom Defined Behaviors" text box:
 #define ENABLE_MOUSE_KEYS // uncomment in the generated snippet if not already
 ```
 
-Base layer: QWERTY (already set as layer #0 in this repo's history; confirm via
-drag & drop in the editor if a different base layout is wanted).
+Base layer: QWERTY (layer #0).
 
 ## Firmware version / Advanced Configuration
 
@@ -87,19 +88,83 @@ Three separate signals I wanted; here's the actual status of each:
   profile switch to also jump to its own colored layer — decided against it
   since it reintroduces the layer bloat already cleaned up.
 
-- **Which OS mode is active** (the macOS-shortcuts toggle, Magic + Backslash
-  on left half or Grave/Tilde on right half) — confirmed NOT covered by the
-  default RGB layer colors; toggling it produces no visible change, since
-  it's a "hidden" layer with no visible key remapping and isn't part of
-  whatever default color set ships. To add this would require hand-authoring
-  a `zmk,underglow-layer` child node (real devicetree binding, confirmed from
-  MoErgo's actual firmware source at `moergo-sc/zmk` PR #36 / branch
-  `rgb-layer-24.12`) with `layer-id`, `fade-delay`, and an 80-entry
-  `bindings` array (colored key(s) via `&ug_color <COLOR>`, rest `&trans`)
-  pasted into Custom Defined Behaviors. Untested territory — neither MoErgo's
-  own PR nor sunaku's upstream keymap use this pattern anywhere, so it'd need
-  real trial-and-error against a build. Treat as its own future project, not
-  a quick tweak, if this still bothers me in daily use.
+- **Which OS mode is active** — originally a manual toggle (Magic + Backslash
+  / Grave), confirmed NOT covered by default RGB layer colors (toggling it
+  produced no visible change, since it's a "hidden" layer with no key
+  remapping of its own). As of the full redesign below, this manual toggle no
+  longer exists at all — OS mode now switches automatically as part of the
+  BT profile switch, so there's nothing left to indicate separately. Adding a
+  persistent color for it would still require hand-authoring a
+  `zmk,underglow-layer` devicetree node (confirmed real from MoErgo's
+  `moergo-sc/zmk` PR #36 source, untested territory, no existing example to
+  follow) — low priority now that the toggle itself is gone.
+
+## Full redesign (2026-09-16)
+
+Rebuilt from scratch to optimize for Omarchy/Hyprland + Neovim use and
+seamless Mac/Linux switching. The finished file lives at
+`~/Downloads/glove80-redesigned-2026-09-16.json` and is also committed as
+this repo's `keymap.json`. To apply it: Layout Editor → Settings →
+Experimental Settings → enable "Enable local config" → back on Edit tab →
+"Upload" this JSON file (confirmed real via README's own "Mirroring
+horizontally" section, which describes uploading an edited JSON back in).
+
+**What changed:**
+
+- Deleted 15 unreachable layers (Dvorak, Colemak, Enthium, the 8 per-finger
+  pinky-shift layers, Emoji, World, Factory) and renumbered everything.
+  Kept Gaming even though unreachable, per request. All raw-integer layer
+  references (`&to N`, `&tog N`) were hand-verified against the new indices;
+  symbolic `LAYER_X` references auto-resolve since MoErgo's compiler
+  generates those `#define`s from `layer_names` order.
+- **Seamless Mac/Linux switching**: BT profile 0 = Linux, profile 1 = Mac.
+  Switching profile (on the Magic layer, same keys as before) now also
+  resets shortcut mode in the same keypress, via two new macros
+  (`bt_seamless_linux`, `bt_seamless_mac`) using `&to 0` + `&tog <macOS
+  layer>`. Verified against ZMK's actual `zmk_keymap_layer_to()` source
+  that `&to` deterministically clears every layer before activating its
+  target, so this can't desync the way a bare toggle could. The old
+  standalone manual macOS-mode toggle key is gone — no longer needed.
+  `OPERATING_SYSTEM` is set back to `'L'` (Linux) as the compile-time base
+  (governs HRM GACS ordering + Unicode input method), since Linux is now
+  the primary/default profile.
+  - **Known limitation**: this only covers the pre-baked shortcuts already
+    built into the keymap (copy/paste/undo/redo/find/select, in the Cursor
+    layer's `_COPY`/`_PASTE`/etc. macros). A raw, ad-hoc `Ctrl+something`
+    typed via bare home-row-mods (not one of those pre-baked macros) will
+    still send literal Ctrl even while on the Mac profile, since HRM's
+    per-finger modifier assignment is a compile-time constant, not part of
+    the runtime macOS-mode overlay. Fixing that fully would mean extending
+    the overlay to the raw HRM behaviors themselves — bigger, unverified
+    devicetree work, not attempted here.
+- **Thumb cluster redesign** (Space/Backspace on left/right T4 kept exactly
+  where they were, just fixed a swapped label — the description text had
+  Cursor/Symbol backwards from the actual bound layer):
+  - Right T2 (was a redundant duplicate of left T2's Lower access): now
+    Super+Tab (next Hyprland workspace).
+  - Right T3 (was mouse-scroll-up, deprioritized per request): now
+    Alt+Shift+Tab (previous window), pairing with T6 the same way left T3/T6
+    already pair for Page Up/Down.
+  - Right T6 (was mouse-scroll-down): now Alt+Tab (next window).
+  - Mouse layer itself untouched — still reachable exactly as before.
+- Screenshot (`PSCRN`) added to the Function layer (grouped with the
+  existing one-thumb-hold volume/brightness/media cluster), in addition to
+  its existing spot on the System layer.
+- QWERTY's old Emoji/World hold-keys (outer columns, both hands) simplified
+  to plain sticky one-shot Shift, since those layers are gone — kept the
+  useful half of what those keys did.
+- **Not done**: baking Super into the Number layer's digit row to shrink the
+  Super+workspace-number chord from 3-way (pinky Win + Number-layer thumb +
+  digit) to 2-way. Tried this, caught it before shipping — it would break
+  plain number typing on that exact layer (every digit press while holding
+  Number would send Super+digit instead of the digit itself). Left as a
+  3-way hold; fixing it properly would need a dedicated key/layer not
+  already spoken for by the thumb redesign above.
+
+First build attempt with this file may need a fix-up round — this is a
+first-of-its-kind edit to this specific JSON format and MoErgo's web app
+(which assembles this JSON into the final buildable keymap) is closed
+source, so this couldn't be test-compiled ahead of time.
 
 ## After it's working: export for CI
 
