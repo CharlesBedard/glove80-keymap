@@ -65,6 +65,42 @@ keys. A firmware/version change can shift the BLE bond structure, so both
 halves need to be wiped back to a clean state and re-paired together —
 wiping only one half causes a mismatch since the bond is mutual.
 
+## Visual indicators (RGB)
+
+Three separate signals I wanted; here's the actual status of each:
+
+- **Which layer I'm on** — solved, works out of the box. With
+  `EXPERIMENTAL_RGB_LAYER` enabled, hold Magic and tap **G** to cycle RGB
+  effects (`RGB_EFF`) forward through: Solid → Breathe → Spectrum → Swirl →
+  **Layer Indicators** (this last one only exists because the flag is on).
+  Confirmed on hardware: holding different layer keys (Number/Symbol/Cursor/
+  etc.) visibly changes the color. No extra config needed — MoErgo's default
+  build already includes color mappings, contrary to what the PR36 firmware
+  source alone suggested (it only shows the *rendering engine*, not where a
+  default color map is set — evidently the shipped default config provides
+  one anyway).
+
+- **Which computer/BT profile is active** — no persistent indicator exists
+  for this in MoErgo's firmware. Went with flash-on-demand instead: Magic + T
+  briefly flashes the current profile/battery status. A persistent option
+  would require duplicating the base layer per computer and tying each BT
+  profile switch to also jump to its own colored layer — decided against it
+  since it reintroduces the layer bloat already cleaned up.
+
+- **Which OS mode is active** (the macOS-shortcuts toggle, Magic + Backslash
+  on left half or Grave/Tilde on right half) — confirmed NOT covered by the
+  default RGB layer colors; toggling it produces no visible change, since
+  it's a "hidden" layer with no visible key remapping and isn't part of
+  whatever default color set ships. To add this would require hand-authoring
+  a `zmk,underglow-layer` child node (real devicetree binding, confirmed from
+  MoErgo's actual firmware source at `moergo-sc/zmk` PR #36 / branch
+  `rgb-layer-24.12`) with `layer-id`, `fade-delay`, and an 80-entry
+  `bindings` array (colored key(s) via `&ug_color <COLOR>`, rest `&trans`)
+  pasted into Custom Defined Behaviors. Untested territory — neither MoErgo's
+  own PR nor sunaku's upstream keymap use this pattern anywhere, so it'd need
+  real trial-and-error against a build. Treat as its own future project, not
+  a quick tweak, if this still bothers me in daily use.
+
 ## After it's working: export for CI
 
 Once flashed and confirmed working on hardware, export the local config so it
