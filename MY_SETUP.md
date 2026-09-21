@@ -166,6 +166,55 @@ first-of-its-kind edit to this specific JSON format and MoErgo's web app
 (which assembles this JSON into the final buildable keymap) is closed
 source, so this couldn't be test-compiled ahead of time.
 
+## Vim arrows + full macOS HRM parity (2026-09-21)
+
+Two more fixes, on top of the 2026-09-16 redesign above:
+
+- **Cursor layer arrows moved to H/J/K/L** (were on J/K/L/;, in visual
+  LEFT/UP/DOWN/RIGHT order instead of vim's LEFT/DOWN/UP/RIGHT reading
+  order). Now: H=Left, J=Down, K=Up, L=Right, matching real vim finger
+  placement exactly. The `;` key (previously Right) is now unbound
+  (`&none`) since Right moved one column left onto L.
+
+- **macOS home-row-mod swap now covers every context layer, not just the
+  base layer.** Previously, `bt_seamless_mac`'s `&tog 1` only swapped the
+  pinky/middle mods (Win/Ctrl <-> Cmd/Ctrl) for plain typing on the base
+  QWERTY layer. Three overlay layers shipped by upstream for this exact
+  purpose -- `macOS_left`, `macOS_right`, `macOS_lower` -- were never
+  wired to anything and sat completely dead, so the one-handed modifier
+  rows inside Cursor, Lower, Symbol, Mouse, and System (used for e.g.
+  one-handed Ctrl/Cmd-click while the other hand is on the mouse) stayed
+  in Linux mode even on the Mac profile. That's the inconsistency that
+  prompted this fix.
+
+  Couldn't just toggle `macOS_left`/`macOS_right`/`macOS_lower` globally
+  alongside layer 1 in `bt_seamless_mac` -- since they're higher-numbered
+  than the base layer, a persistent toggle would outrank it for those
+  same key positions *all the time*, replacing plain A/S/D/F/etc typing
+  with raw modifier presses. Instead, added five new macros
+  (`cursor_hold_mac`, `lower_hold_mac`, `symbol_hold_mac`,
+  `mouse_hold_mac`, `system_hold_mac`) that each `&mo` both the context
+  layer AND its macOS overlay together, released together on key-up --
+  same `macro_press` / `macro_pause_for_release` / `macro_release`
+  pattern this file already uses for the LeftPinky/RightPinky hold
+  behaviors. Four new hold-tap nodes (`cursor_mac_thumb`,
+  `symbol_mac_thumb`, `mouse_mac_thumb`, `system_mac_thumb`) wrap those
+  macros on the hold side while keeping the original tap key
+  (Backspace/Space/Tab/Enter) unchanged. Lower's thumb key had no tap
+  behavior to preserve, so it's bound straight to `lower_hold_mac`. All
+  five overrides live inside the existing "macOS" overlay layer (index 1,
+  positions 53/57/69/73/74), so they only exist at all while on the Mac
+  BT profile -- zero effect on Linux.
+
+  Like the 2026-09-16 redesign, this is hand-authored devicetree that
+  couldn't be test-compiled ahead of time -- may need a fix-up round
+  after the first build.
+
+Updated file for upload: `~/Downloads/glove80-redesigned-2026-09-21.json`
+(also committed as this repo's `keymap.json`). Same upload steps as before:
+Layout Editor -> Settings -> Experimental Settings -> "Enable local config"
+-> Edit tab -> Upload.
+
 ## After it's working: export for CI
 
 Once flashed and confirmed working on hardware, export the local config so it
