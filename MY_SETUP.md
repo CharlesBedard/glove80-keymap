@@ -285,6 +285,24 @@ Updated file for upload: `~/Downloads/glove80-redesigned-2026-09-22.json`
 (also committed as this repo's `keymap.json`). Same upload steps as
 above.
 
+## Gaming layer: left-hand Ctrl + bindable dead keys for PoE2 (2026-10-07)
+
+Path of Exile 2 runs in WASD mode set to ESDF (same as CS2), so the plain
+left hand already works for movement. The one thing the firmware had to fix
+was **no Ctrl on the left hand**. PoE2's second skill bar is Ctrl+Q/E/R/T/F,
+and Ctrl+click item moves are hardcoded. Left thumb top-middle (position 53)
+was `&mo LAYER_Lower` (numpad/arrows, no use in-game). On Gaming it's now
+plain `&kp LCTRL`.
+
+Every other left-hand key now sends something PoE2 can bind. Letters and
+numbers stay real QWERTY so chat still types normally. Dead keys became
+F-keys: 0-4 -> F1-F5, 10 -> F6, 22 -> F7, 66/67 (parang macros, which send
+Shift+9/0) -> F8/F10. **F9 skipped on purpose**: Omarchy binds it to voxtype
+push-to-talk dictation, so Hyprland would eat it. The rest of the in-game
+mapping is done in PoE2's own keybind settings, not here.
+
+Updated file for upload: `~/Downloads/glove80-redesigned-2026-10-07.json`.
+
 ## After it's working: export for CI
 
 Once flashed and confirmed working on hardware, export the local config so it

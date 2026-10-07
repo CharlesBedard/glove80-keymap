@@ -1145,7 +1145,44 @@
     ],
     [
       {
-        "value": "&none"
+        "value": "&kp",
+        "params": [
+          {
+            "value": "F1"
+          }
+        ]
+      },
+      {
+        "value": "&kp",
+        "params": [
+          {
+            "value": "F2"
+          }
+        ]
+      },
+      {
+        "value": "&kp",
+        "params": [
+          {
+            "value": "F3"
+          }
+        ]
+      },
+      {
+        "value": "&kp",
+        "params": [
+          {
+            "value": "F4"
+          }
+        ]
+      },
+      {
+        "value": "&kp",
+        "params": [
+          {
+            "value": "F5"
+          }
+        ]
       },
       {
         "value": "&none"
@@ -1163,19 +1200,12 @@
         "value": "&none"
       },
       {
-        "value": "&none"
-      },
-      {
-        "value": "&none"
-      },
-      {
-        "value": "&none"
-      },
-      {
-        "value": "&none"
-      },
-      {
-        "value": "&none"
+        "value": "&kp",
+        "params": [
+          {
+            "value": "F6"
+          }
+        ]
       },
       {
         "value": "&kp",
@@ -1261,7 +1291,12 @@
         "value": "&none"
       },
       {
-        "value": "&none"
+        "value": "&kp",
+        "params": [
+          {
+            "value": "F7"
+          }
+        ]
       },
       {
         "value": "&kp",
@@ -1528,17 +1563,15 @@
         ]
       },
       {
-        "value": "Custom",
+        "value": "&kp",
         "params": [
           {
-            "value": "&mo LAYER_Lower"
+            "value": "LCTRL"
           }
         ],
         "decoration": {
-          "label": "Lower",
-          "icon": "fa-angle-double-down",
-          "background": "#ffccbcff",
-          "description": "Hold for Lower layer."
+          "label": "Ctrl",
+          "description": "Gaming: plain Ctrl on left thumb (PoE2 Ctrl+skills, Ctrl+click)."
         }
       },
       {
@@ -1657,28 +1690,20 @@
         ]
       },
       {
-        "value": "Custom",
+        "value": "&kp",
         "params": [
           {
-            "value": "&parang_left"
+            "value": "F8"
           }
-        ],
-        "decoration": {
-          "label": "( <",
-          "description": "Parang: Tap for parenthesis, shift-tap for angle bracket."
-        }
+        ]
       },
       {
-        "value": "Custom",
+        "value": "&kp",
         "params": [
           {
-            "value": "&parang_right"
+            "value": "F10"
           }
-        ],
-        "decoration": {
-          "label": ") >",
-          "description": "Parang: Tap for parenthesis, shift-tap for angle bracket."
-        }
+        ]
       },
       {
         "value": "&kp",
