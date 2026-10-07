@@ -215,6 +215,76 @@ Updated file for upload: `~/Downloads/glove80-redesigned-2026-09-21.json`
 Layout Editor -> Settings -> Experimental Settings -> "Enable local config"
 -> Edit tab -> Upload.
 
+## Gaming layer rebuilt for CS2 ESDF (2026-09-22)
+
+The stock `Gaming` layer (inherited from upstream, index 2) was garbage --
+its 80 bindings were authored against a completely different physical key
+ordering than this repo's actual `QWERTY` layer uses, so e.g. position 35
+(the physical `A` key everywhere else) played `TAB` in Gaming. Not a rough
+draft, just scrambled. Rebuilt from scratch.
+
+**Design call: the WASD-to-ESDF shift lives in CS2's keybinds, not in the
+keyboard firmware.** Remapping physical `E/S/D/F` to *emit* `W/A/S/D`
+keycodes would break chat typing (the OS would see "w" when the physical
+"e" key is pressed). Instead the Gaming layer sends plain, real letters --
+identical to typing -- and Counter-Strike 2's own bind file
+(`~/.local/share/Steam/userdata/193422796/730/{local/cfg/cs2_user_keys_0_slot0,remote/cs2_user_keys}.vcfg`)
+now interprets E/S/D/F as forward/left/back/right directly. This is the
+standard real-world ESDF scheme (index reaches up to E for forward, ring
+covers left/S, middle covers back/D, index covers right/F) -- verified
+against this account's actual live binds first, since `q/e/c/v/x/z` were
+already repurposed for weapon slots (`slot5/6/7/8/10`) and utility
+(`toggleradarscale`), and `f` was `+use`. Old `e`=`slot6` moved to the now-
+free `a` (pinky column becomes an equipment-slot column: Q=slot5, A=slot6,
+Z=toggleradarscale). Old `f`=`+use` moved to the now-free `w`.
+
+**Why a Gaming layer is still needed even though letters don't change:**
+base `QWERTY`'s `A/S/D/F` are home-row-mod hold-taps (tap-preferred,
+240ms) -- holding one of them past the threshold (normal during a strafe
+or backing out of a fight) resolves to the *hold* action (Win/Alt/Ctrl/
+Shift) instead of continuing to send the letter. Same hazard hits `SPACE`
+(hold-tap into Symbol layer -- CS2 binds Space to `+jump`, held constantly
+for bhop) and `TAB` (hold-tap into Mouse layer -- CS2 binds Tab to
+`+showscores`, held to view the scoreboard). None of this can be fixed
+from the CS2 side; the tap/hold resolution happens in firmware before any
+keycode reaches the OS.
+
+**Split by hand, not uniformly:** left hand (`Q W E R T` / `A S D F G` /
+`Z X C V B`) plus the left thumb cluster are forced to plain instant keys
+-- that's the active movement/ability hand. The right hand (`Y U I O P` /
+`H J K L ; '` / `N M , . /`) plus its thumb cluster keep base QWERTY's
+home-row-mods and sticky shift completely untouched, since that hand is
+normally on the mouse and the user wants it to keep working normally for
+navigation (alt-tab, Ctrl-click, etc.) when it comes off the mouse. The
+one exception: `SPACE` and `TAB` are physically on the *right* thumb
+cluster (not left) but still get forced plain, since CS2 binds them to
+held gameplay actions regardless of which hand presses them. With the
+left hand's D-hold (Ctrl) gone, the right hand's `K`-hold (`RightMiddy`)
+is now the only remaining way to send Ctrl at all on this layer -- which
+matters since CS2's Ctrl is bound to `+lookatweapon`.
+
+**Activation:** the layer had no entry point at all -- nothing anywhere in
+the keymap referenced it by name, layer-select combo included. Added
+`&tog LAYER_Gaming` on Magic layer position 11 (top row, right next to the
+existing `&to 0` "return to QWERTY" key at position 10). Hold either Magic
+corner key (bottom-left/bottom-right outer keys on the base layer) with
+one hand, tap that key with the other -- toggles Gaming on, same chord
+toggles it back off.
+
+**RGB: solid red while gaming.** The per-key RGB layer-indicator feature
+(`custom_devicetree`'s `zmk,underglow-layer` block, PR36 firmware --
+already enabled via `EXPERIMENTAL_RGB_LAYER=y`, see "Visual indicators"
+above) already shipped a `Gaming { ... }` color map, just a mixed palette
+(orange/coral/teal/gold/azure/yellow/red/green highlighting specific
+keys). Replaced every token in that block with `RED`, so the whole board
+goes solid red the instant Gaming is toggled on -- an unmistakable "you're
+in gaming mode" signal. Same activation as before: hold Magic + tap **G**
+to cycle to "Layer Indicators" RGB effect mode if it isn't already there.
+
+Updated file for upload: `~/Downloads/glove80-redesigned-2026-09-22.json`
+(also committed as this repo's `keymap.json`). Same upload steps as
+above.
+
 ## After it's working: export for CI
 
 Once flashed and confirmed working on hardware, export the local config so it
